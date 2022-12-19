@@ -1,4 +1,8 @@
-from django.test import TestCase, Client
+import shutil
+import tempfile
+
+from django.conf import settings
+from django.test import TestCase, Client, override_settings
 from django.urls import reverse
 from django.core.files.uploadedfile import SimpleUploadedFile
 
@@ -16,7 +20,10 @@ GROUP_URL2 = reverse('posts:group_list', kwargs={'slug': SLUG2})
 PROFILE_URL = reverse('posts:profile', kwargs={'username': USER})
 POST_CREATE_URL = reverse('posts:post_create')
 
+TEMP_MEDIA_ROOT = tempfile.mkdtemp(dir=settings.BASE_DIR)
 
+
+@override_settings(MEDIA_ROOT=TEMP_MEDIA_ROOT)
 class PostsPageTests(TestCase):
     @classmethod
     def setUpClass(cls):
@@ -53,6 +60,11 @@ class PostsPageTests(TestCase):
                                kwargs={'post_id': cls.post.id})
         cls.POST_EDIT_URL = reverse('posts:post_edit',
                                     kwargs={'post_id': cls.post.id})
+
+    @classmethod
+    def tearDownClass(cls):
+        super().tearDownClass()
+        shutil.rmtree(TEMP_MEDIA_ROOT, ignore_errors=True)
 
     def setUp(self):
         self.guest_client = Client()
