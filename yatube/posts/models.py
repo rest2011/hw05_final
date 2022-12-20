@@ -86,6 +86,13 @@ class Comment(models.Model):
     )
     created = models.DateTimeField('Дата публикации', auto_now_add=True)
 
+    class Meta:
+        verbose_name = 'Комментарий'
+        verbose_name_plural = 'Комментарии'
+
+    def __str__(self):
+        return self.text[:15]
+
 
 class Follow(models.Model):
     user = models.ForeignKey(
@@ -102,3 +109,24 @@ class Follow(models.Model):
         verbose_name='Автор',
         help_text='Имя автора'
     )
+
+    class Meta:
+        verbose_name = 'Подписка'
+        verbose_name_plural = 'Подписки'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'author'], name="unique_followers"),
+            models.CheckConstraint(
+                check=~models.Q(author=models.F('user')),
+                name='users_cannot_rate_themselves'
+            )
+        ]
+
+    def __str__(self):
+        return f'Подписка {self.user} на {self.author}'
+
+    def save(self, *args, **kwargs):
+        if self.user != self.author:
+            super().save(*args, **kwargs)
+        else:
+            raise ValueError("end_date should be greater than start_date")
