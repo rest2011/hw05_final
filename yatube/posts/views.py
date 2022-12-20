@@ -1,6 +1,6 @@
+from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.shortcuts import (render, get_object_or_404, redirect)
-from django.contrib.auth.decorators import login_required
 
 from .forms import PostForm, CommentForm
 from .models import Post, Group, User, Follow
@@ -28,12 +28,12 @@ def group_posts(request, slug):
 
 def profile(request, username):
     author = get_object_or_404(User, username=username)
-    if request.user.is_authenticated:
+    if not request.user.is_authenticated:
+        following = False
+    else:
         following = Follow.objects.filter(
             user=request.user, author=author
         ).exists()
-    else:
-        following = False
     return render(request, 'posts/profile.html', {
         'page_obj': page_obj(request, author.posts.all()),
         'author': author,
@@ -45,7 +45,6 @@ def post_detail(request, post_id):
     return render(request, 'posts/post_detail.html', {
         'post': get_object_or_404(Post, id=post_id),
         'form': CommentForm(request.POST or None),
-        'comments': get_object_or_404(Post, id=post_id).comments.all(),
     })
 
 
@@ -111,7 +110,6 @@ def profile_follow(request, username):
 @login_required
 def profile_unfollow(request, username):
     author = get_object_or_404(User, username=username)
-    is_follower = Follow.objects.filter(user=request.user, author=author)
-    if is_follower.exists():
-        is_follower.delete()
-    return redirect('posts:profile', username=author)
+    follow = get_object_or_404(Follow, user=request.user, author=author)
+    follow.delete()
+    return redirect('posts:profile', username=username)
