@@ -52,7 +52,9 @@ class Post(models.Model):
     image = models.ImageField(
         'Картинка',
         upload_to='posts/',
-        blank=True
+        blank=True,
+        help_text='Поле для загрузки картинки',
+
     )
 
     class Meta:
@@ -70,8 +72,8 @@ class Comment(models.Model):
         on_delete=models.CASCADE,
         related_name='comments',
         blank=True, null=True,
-        verbose_name='Комментарий',
-        help_text='Комментарий к посту',
+        verbose_name='Пост',
+        help_text='Пост для комментария',
     )
     author = models.ForeignKey(
         User,
