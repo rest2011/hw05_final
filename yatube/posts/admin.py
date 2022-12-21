@@ -20,33 +20,34 @@ class PostAdmin(admin.ModelAdmin):
 class GroupAdmin(admin.ModelAdmin):
     list_display = (
         'pk',
-        'title',        
+        'title',
         'description',
     )
     list_editable = ('title',)
     search_fields = ('description',)
     list_filter = ('title',)
-    empty_value_display = '-пусто-'    
+    empty_value_display = '-пусто-'
 
 
 class CommentAdmin(admin.ModelAdmin):
     list_display = (
         'pk',
-        'text',        
+        'text',
         'post',
     )
     search_fields = ('text',)
     list_filter = ('text',)
-    empty_value_display = '-пусто-'  
+    empty_value_display = '-пусто-'
 
 
 class FollowAdmin(admin.ModelAdmin):
     list_display = (
         'pk',
-        'user',        
+        'user',
         'author',
     )
-    empty_value_display = '-пусто-'      
+    empty_value_display = '-пусто-'
+
 
 admin.site.register(Post, PostAdmin)
 admin.site.register(Group, GroupAdmin)
