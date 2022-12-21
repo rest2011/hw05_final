@@ -126,9 +126,3 @@ class Follow(models.Model):
 
     def __str__(self):
         return f'Подписка {self.user} на {self.author}'
-
-    # def save(self, *args, **kwargs):
-    #     if self.user != self.author:
-    #         super().save(*args, **kwargs)
-    #     else:
-    #         raise ValueError("end_date should be greater than start_date")
