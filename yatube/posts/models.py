@@ -97,6 +97,7 @@ class Comment(models.Model):
 
 
 class Follow(models.Model):
+    following = '{user} подписался на {author}'
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -120,9 +121,11 @@ class Follow(models.Model):
                 fields=['user', 'author'], name="unique_followers"),
             models.CheckConstraint(
                 check=~models.Q(author=models.F('user')),
-                name='users_cannot_rate_themselves'
+                name='users_cannot_follow_themselves'
             )
         ]
 
     def __str__(self):
-        return f'Подписка {self.user} на {self.author}'
+        return self.following.format(
+            user=self.user.username, author=self.author.username
+        )

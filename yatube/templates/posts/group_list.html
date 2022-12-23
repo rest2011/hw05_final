@@ -6,10 +6,8 @@
     <p>{{ group.description|linebreaksbr }}</p>
     {% load cache %}
     {% cache 20 group_page %}
-    {% include 'posts/includes/posts.html' %}
+      {% include 'posts/includes/posts.html' %}
     {% endcache %}
-    {% comment %} {% for post in page_obj %}
-    {% endfor %} {% endcomment %}
     {% include 'posts/includes/paginator.html' %}
   </div>
 {% endblock %}

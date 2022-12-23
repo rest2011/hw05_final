@@ -8,20 +8,22 @@
       <h5>Подписок: {{ author.follower.count }}</h5>
       <h5>Подписчиков: {{ author.following.count }}</h5>
       <h5>Комментариев: {{ author.comments.count }}</h5>
+      {% if user != author and user.is_authenticated %}
       {% if following %}
         <a class="btn btn-lg btn-light"
            href="{% url 'posts:profile_unfollow' author.username %}"
            role="button">Отписаться</a>
-      {% elif user != author and user.is_authenticated %}
+      {% else %}
         <a class="btn btn-lg btn-primary"
            href="{% url 'posts:profile_follow' author.username %}"
            role="button">Подписаться</a>
       {% endif %}
+      {% endif %}
       {% load cache %}
       {% cache 20 profile_page %}
-      {% include 'posts/includes/posts.html' %}
+        {% include 'posts/includes/posts.html' %}
       {% endcache %}
-      {% include 'posts/includes/paginator.html' %}
+    {% include 'posts/includes/paginator.html' %}
     </div>
   </div>
 {% endblock %}

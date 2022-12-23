@@ -2,11 +2,11 @@
 {% block title %}Последние записи избранных авторов{% endblock %}
 {% block content %}
   <div class="container py-5">
-    {% include 'posts/includes/switcher.html' %}
+    {% include 'posts/includes/switcher.html' with follow=True %}
     <h1>Последние записи избранных авторов</h1>
     {% load cache %}
     {% cache 20 follow_page %}
-    {% include 'posts/includes/posts.html' %}
+      {% include 'posts/includes/posts.html' %}
     {% endcache %}
     {% include 'posts/includes/paginator.html' %}
   </div>
