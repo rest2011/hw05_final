@@ -68,7 +68,9 @@ class URLTests(TestCase):
             [PROFILE_FOLLOW_URL, self.user_client, 302],
             [PROFILE_UNFOLLOW_URL, self.user_client, 404],
             [PROFILE_FOLLOW_URL, self.guest_client, 302],
-            [PROFILE_UNFOLLOW_URL, self.guest_client, 302]
+            [PROFILE_UNFOLLOW_URL, self.guest_client, 302],
+            [PROFILE_FOLLOW_URL, self.author_client, 500],
+            [PROFILE_UNFOLLOW_URL, self.author_client, 404]
         ]
         for url, client, status_code in pages_status:
             with self.subTest(url=url, client=client):

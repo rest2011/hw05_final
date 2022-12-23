@@ -19,6 +19,8 @@ NONAUTHOR = 'nonauthor'
 LOGIN_URL = reverse('users:login')
 POST_CREATE_URL = reverse('posts:post_create')
 PROFILE_URL = reverse('posts:profile', args=[USER])
+POST_CREATE_TO_LOGIN_REDIRECT = (f'{LOGIN_URL}?next={POST_CREATE_URL}')
+
 UPLOAD_TO = Post._meta.get_field('image').upload_to
 
 SMALL_GIF = (
@@ -67,9 +69,6 @@ class PostFormTests(TestCase):
                                       args=[cls.post.id])
         cls.ADD_COMMENT_TO_LOGIN_REDIRECT = (
             f'{LOGIN_URL}?next={cls.ADD_COMMENT_URL}'
-        )
-        cls.POST_CREATE_TO_LOGIN_REDIRECT = (
-            f'{LOGIN_URL}?next={POST_CREATE_URL}'
         )
         cls.POST_EDIT_TO_LOGIN_REDIRECT = (
             f'{LOGIN_URL}?next={cls.POST_EDIT_URL}'
@@ -158,20 +157,21 @@ class PostFormTests(TestCase):
         """Опубликованный комментарий появляется на странице поста"""
         comments = set(Comment.objects.all())
         form_data = {
-            'text': 'Текст комментария 1'
+            'text': 'Текст комментария 1',
+            'post': self.post,
+            'author': self.post.author
         }
         response = self.authorized_client.post(
             self.ADD_COMMENT_URL,
             data=form_data,
             follow=True
         )
-        comments = set(Comment.objects.all()) - comments
         self.assertRedirects(response, self.POST_DETAIL_URL)
-        self.assertEqual(len(comments), 1)
-        comment = comments.pop()
-        self.assertIn(comment, self.authorized_client.get(
-            self.POST_DETAIL_URL).context['post'].comments.all())
+        self.assertEqual(len(set(Comment.objects.all())), len(comments) + 1)
+        comment = set(Comment.objects.all()).pop()
         self.assertEqual(form_data['text'], comment.text)
+        self.assertEqual(form_data['post'], self.post)
+        self.assertEqual(form_data['author'], self.post.author)
 
     def test_guest_cant_create_comment_or_post(self):
         """Гость не может создать комментарий или пост"""
@@ -179,39 +179,29 @@ class PostFormTests(TestCase):
         form_data_comment = {
             'text': 'Текст комментария 1'
         }
-        response_comment = self.guest_client.post(
-            self.ADD_COMMENT_URL,
-            data=form_data_comment,
-            follow=True
-        )
-        comments = set(Comment.objects.all()) - comments
-        self.assertRedirects(response_comment,
-                             self.ADD_COMMENT_TO_LOGIN_REDIRECT)
-        self.assertEqual(len(comments), 0)
-        uploaded2 = SimpleUploadedFile(
-            name='small2.gif',
-            content=SMALL_GIF,
-            content_type='image/gif'
-        )
         posts = set(Post.objects.all())
         uploaded2 = SimpleUploadedFile(
             name='small2.gif',
             content=SMALL_GIF,
             content_type='image/gif'
         )
-        form_data = {
+        form_data_post = {
             'text': 'Тестовый пост 2',
             'group': self.group.id,
             'image': uploaded2,
         }
-        response_post = self.guest_client.post(
-            POST_CREATE_URL,
-            data=form_data,
-            follow=True
-        )
-        posts = set(Post.objects.all()) - posts
-        self.assertRedirects(response_post, self.POST_CREATE_TO_LOGIN_REDIRECT)
-        self.assertEqual(len(posts), 0)
+        urls = [
+            [POST_CREATE_URL, Post, posts,
+             POST_CREATE_TO_LOGIN_REDIRECT, form_data_post],
+            [self.ADD_COMMENT_URL, Comment, comments,
+             self.ADD_COMMENT_TO_LOGIN_REDIRECT, form_data_comment]
+        ]
+        for url, klass, type, redirect, form_data in urls:
+            with self.subTest(url=url):
+                response = self.guest_client.post(url, data=form_data,
+                                                  follow=True)
+                self.assertRedirects(response, redirect)
+                self.assertEqual(len(set(klass.objects.all())), len(type))
 
     def test_guest_or_nonauthor_cant_update_post(self):
         """Гость или неавтор не могут редактировать пост"""
@@ -226,21 +216,13 @@ class PostFormTests(TestCase):
             'group': self.group2.id,
             'image': uploaded3,
         }
-        response_guest = self.guest_client.post(
-            self.POST_EDIT_URL,
-            data=form_data,
-            follow=True
-        )
-        response_nonauthor = self.nonauthor_client.post(
-            self.POST_EDIT_URL,
-            data=form_data,
-            follow=True
-        )
-        post = Post.objects.get(id=self.post.id)
-        self.assertRedirects(response_guest, self.POST_EDIT_TO_LOGIN_REDIRECT)
-        self.assertRedirects(response_nonauthor, self.POST_DETAIL_URL)
+        clients = [
+            [self.guest_client, self.POST_EDIT_TO_LOGIN_REDIRECT],
+            [self.nonauthor_client, self.POST_DETAIL_URL]
+        ]
+        for client, redirect in clients:
+            with self.subTest(client=client):
+                response = client.post(
+                    self.POST_EDIT_URL, data=form_data, follow=True)
+                self.assertRedirects(response, redirect)
         self.assertEqual(Post.objects.count(), posts_count)
-        self.assertNotEqual(form_data['text'], post.text)
-        self.assertNotEqual(form_data['group'], post.group.id)
-        self.assertNotEqual(f"{UPLOAD_TO}{form_data['image']}", post.image)
-        self.assertNotEqual(self.nonauthor, self.post.author)

@@ -1,7 +1,6 @@
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.shortcuts import (render, get_object_or_404, redirect)
-from django.urls import reverse
 
 from .forms import PostForm, CommentForm
 from .models import Post, Group, User, Follow
@@ -32,10 +31,12 @@ def profile(request, username):
         following = Follow.objects.filter(
             user=request.user, author=author
         ).exists()
+    else:
+        following = False
     return render(request, 'posts/profile.html', {
         'page_obj': page_obj(request, author.posts.all()),
         'author': author,
-        'following': following
+        'following': following,
     })
 
 
@@ -106,6 +107,6 @@ def profile_follow(request, username):
 
 @login_required
 def profile_unfollow(request, username):
-    follow = get_object_or_404(Follow, user=request.user, author__username=username)
-    follow.delete()
+    get_object_or_404(
+        Follow, user=request.user, author__username=username).delete()
     return redirect('posts:profile', username=username)

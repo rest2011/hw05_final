@@ -3,6 +3,8 @@ from django.contrib.auth import get_user_model
 
 User = get_user_model()
 
+FOLLOW = '{user} подписался на {author}'
+
 
 class Group(models.Model):
     title = models.CharField(
@@ -97,7 +99,6 @@ class Comment(models.Model):
 
 
 class Follow(models.Model):
-    following = '{user} подписался на {author}'
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -126,6 +127,6 @@ class Follow(models.Model):
         ]
 
     def __str__(self):
-        return self.following.format(
+        return FOLLOW.format(
             user=self.user.username, author=self.author.username
         )
