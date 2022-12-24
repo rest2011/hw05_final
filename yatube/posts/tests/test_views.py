@@ -168,3 +168,9 @@ class PostsPageTests(TestCase):
         follow_count = Follow.objects.count()
         self.follower_client.post(PROFILE_UNFOLLOW_URL)
         self.assertEqual(Follow.objects.count(), follow_count - 1)
+
+    def test_user_cant_follow_self(self):
+        """Авторизованный пользователь не может подписаться на себя"""
+        self.authorized_client.post(PROFILE_FOLLOW_URL)
+        self.assertFalse(Follow.objects.filter(user=self.user,
+                         author=self.user))

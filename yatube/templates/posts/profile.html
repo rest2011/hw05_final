@@ -1,29 +1,31 @@
 {% extends 'base.html' %}
 {% block title %}Профайл пользователя {{ author.get_full_name }}{% endblock %}
 {% block content %}
-  <div class="container py-5">
-    <div class="mb-5">
-      <h1>Все посты пользователя {{ author.get_full_name }}</h1>
-      <h5>Постов: {{ author.posts.count }}</h5>
-      <h5>Подписок: {{ author.follower.count }}</h5>
-      <h5>Подписчиков: {{ author.following.count }}</h5>
-      <h5>Комментариев: {{ author.comments.count }}</h5>
-      {% if user != author and user.is_authenticated %}
+<div class="container py-5">
+  <div class="mb-5">
+    <h1>Все посты пользователя {{ author.get_full_name }}</h1>
+    <h5>Постов: {{ author.posts.count }}</h5>
+    <h5>Подписок: {{ author.follower.count }}</h5>
+    <h5>Подписчиков: {{ author.following.count }}</h5>
+    <h5>Комментариев: {{ author.comments.count }}</h5>
+    {% if user != author and user.is_authenticated %}
       {% if following %}
         <a class="btn btn-lg btn-light"
-           href="{% url 'posts:profile_unfollow' author.username %}"
-           role="button">Отписаться</a>
+            href="{% url 'posts:profile_unfollow' author.username %}"
+            role="button">Отписаться</a>
       {% else %}
         <a class="btn btn-lg btn-primary"
-           href="{% url 'posts:profile_follow' author.username %}"
-           role="button">Подписаться</a>
+            href="{% url 'posts:profile_follow' author.username %}"
+            role="button">Подписаться</a>
       {% endif %}
-      {% endif %}
-      {% load cache %}
-      {% cache 20 profile_page %}
-        {% include 'posts/includes/posts.html' %}
-      {% endcache %}
+    {% endif %}
+    {% load cache %}
+    {% cache 20 profile_page %}
+    {% for post in page_obj %}
+      {% include 'posts/includes/posts.html' %}
+    {% endfor %}
+    {% endcache %}
     {% include 'posts/includes/paginator.html' %}
-    </div>
   </div>
+</div>
 {% endblock %}

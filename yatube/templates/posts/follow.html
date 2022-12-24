@@ -6,7 +6,9 @@
     <h1>Последние записи избранных авторов</h1>
     {% load cache %}
     {% cache 20 follow_page %}
+    {% for post in page_obj %}
       {% include 'posts/includes/posts.html' %}
+    {% endfor %}  
     {% endcache %}
     {% include 'posts/includes/paginator.html' %}
   </div>

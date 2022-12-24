@@ -68,7 +68,7 @@ class URLTests(TestCase):
             [PROFILE_FOLLOW_URL, self.author_client, 302],
             [PROFILE_UNFOLLOW_URL, self.author_client, 302],
             [PROFILE_FOLLOW_URL, self.user_client, 302],
-            [PROFILE_UNFOLLOW_URL, self.user_client, 302],
+            [PROFILE_UNFOLLOW_URL, self.user_client, 404],
             [PROFILE_FOLLOW_URL, self.guest_client, 302],
             [PROFILE_UNFOLLOW_URL, self.guest_client, 302]
         ]
@@ -90,7 +90,6 @@ class URLTests(TestCase):
             [PROFILE_UNFOLLOW_URL, self.guest_client,
              PROFILE_UNFOLLOW_TO_LOGIN_REDIRECT],
             [PROFILE_FOLLOW_URL, self.user_client, PROFILE_URL],
-            [PROFILE_UNFOLLOW_URL, self.user_client, PROFILE_URL],
             [PROFILE_FOLLOW_URL, self.author_client, PROFILE_URL],
             [PROFILE_UNFOLLOW_URL, self.author_client, PROFILE_URL]
         ]
