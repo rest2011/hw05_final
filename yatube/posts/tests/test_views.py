@@ -26,6 +26,8 @@ MAIN_URL = reverse('posts:index')
 POST_CREATE_URL = reverse('posts:post_create')
 POST_URL = reverse('posts:post_detail', args=[POST_ID])
 POST_EDIT_URL = reverse('posts:post_edit', args=[POST_ID])
+PROFILE_FOLLOW_URL = reverse('posts:profile_follow', args=[USER])
+PROFILE_UNFOLLOW_URL = reverse('posts:profile_unfollow', args=[USER])
 
 TEMP_MEDIA_ROOT = tempfile.mkdtemp(dir=settings.BASE_DIR)
 
@@ -149,12 +151,20 @@ class PostsPageTests(TestCase):
         cache3 = self.authorized_client.get(MAIN_URL)
         self.assertNotEqual(cache1.content, cache3.content)
 
-    def test_user_can_follow_unfollow_author(self):
+    def test_user_can_follow_author(self):
         """Авторизованный пользователь может подписываться
-        на других пользователей и удалять их из подписок"""
-        posts = self.follower_client.get(FOLLOW_URL).context['page_obj']
-        self.assertIn(self.post, posts)
-        self.follow.delete()
-        cache.clear()
-        posts2 = self.follower_client.get(FOLLOW_URL).context['page_obj']
-        self.assertNotIn(self.post, posts2)
+        на авторов"""
+        follow_count = Follow.objects.count()
+        self.nonfollower_client.post(PROFILE_FOLLOW_URL)
+        follow = Follow.objects.filter(user=self.nonfollower, author=self.user)
+        self.assertTrue(follow.exists())
+        self.assertEqual(len(follow), 1)
+        self.assertEqual(Follow.objects.count(), follow_count + 1)
+        self.assertEqual(follow.author_id, self.user.id)
+        self.assertEqual(follow.user_id, self.nonfollower.id)
+
+    def test_user_can_follow_author(self):
+        """Авторизованный пользователь может удалять авторов из подписок"""
+        follow_count = Follow.objects.count()
+        self.follower_client.post(PROFILE_UNFOLLOW_URL)
+        self.assertEqual(Follow.objects.count(), follow_count - 1)
