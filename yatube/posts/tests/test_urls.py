@@ -65,12 +65,12 @@ class URLTests(TestCase):
             [POST_EDIT_URL, self.user_client, 302],
             [FOLLOW_URL, self.guest_client, 302],
             [FOLLOW_URL, self.user_client, 200],
-            # # [PROFILE_FOLLOW_URL, self.user_client, 302],
-            # [PROFILE_UNFOLLOW_URL, self.user_client, 404],
-            # # [PROFILE_FOLLOW_URL, self.guest_client, 302],
-            # [PROFILE_UNFOLLOW_URL, self.guest_client, 302],
-            # # [PROFILE_FOLLOW_URL, self.author_client, 302],
-            # [PROFILE_UNFOLLOW_URL, self.author_client, 302]
+            [PROFILE_FOLLOW_URL, self.author_client, 302],
+            [PROFILE_UNFOLLOW_URL, self.author_client, 302],
+            [PROFILE_FOLLOW_URL, self.user_client, 302],
+            [PROFILE_UNFOLLOW_URL, self.user_client, 302],
+            [PROFILE_FOLLOW_URL, self.guest_client, 302],
+            [PROFILE_UNFOLLOW_URL, self.guest_client, 302]
         ]
         for url, client, status_code in pages_status:
             with self.subTest(url=url, client=client):
@@ -84,13 +84,15 @@ class URLTests(TestCase):
             [POST_CREATE_URL, self.guest_client,
              POST_CREATE_TO_LOGIN_REDIRECT],
             [POST_EDIT_URL, self.user_client, POST_DETAIL_URL],
-            # [FOLLOW_URL, self.guest_client, FOLLOW_TO_LOGIN_REDIRECT],
-            # [PROFILE_FOLLOW_URL, self.user_client,
-            #  PROFILE_URL],
-            # [PROFILE_FOLLOW_URL, self.guest_client,
-            #  PROFILE_FOLLOW_TO_LOGIN_REDIRECT],
-            # [PROFILE_UNFOLLOW_URL, self.guest_client,
-            #  PROFILE_UNFOLLOW_TO_LOGIN_REDIRECT]
+            [FOLLOW_URL, self.guest_client, FOLLOW_TO_LOGIN_REDIRECT],
+            [PROFILE_FOLLOW_URL, self.guest_client,
+             PROFILE_FOLLOW_TO_LOGIN_REDIRECT],
+            [PROFILE_UNFOLLOW_URL, self.guest_client,
+             PROFILE_UNFOLLOW_TO_LOGIN_REDIRECT],
+            [PROFILE_FOLLOW_URL, self.user_client, PROFILE_URL],
+            [PROFILE_UNFOLLOW_URL, self.user_client, PROFILE_URL],
+            [PROFILE_FOLLOW_URL, self.author_client, PROFILE_URL],
+            [PROFILE_UNFOLLOW_URL, self.author_client, PROFILE_URL]
         ]
         for url, client, redirect in redirects:
             with self.subTest(url=url, client=client):
