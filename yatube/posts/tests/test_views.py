@@ -119,32 +119,39 @@ class PostsPageTests(TestCase):
             self.assertNotIn(self.post, self.authorized_client.get(url).
                              context['page_obj'])
 
-    def test_paginated_navigation_contains_ten_records(self):
-        """Постраничная навигация выводит по 10 постов."""
+    def pagination_contains_pages_with_up_to_10_posts_each(self):
+        """Пагинация содержит страницы, имеющие каждая до 10 постов"""
+        before_posts_count = Post.objects.count()
         Post.objects.bulk_create(
             Post(
                 author=self.user,
                 text=f'Тестовый пост {i}',
-                group=self.group2,
+                group=self.group,
             )
             for i in range(POSTS_PER_PAGE + 1))
-        urls = [MAIN_URL, GROUP_URL2, PROFILE_URL, FOLLOW_URL]
-        for url in urls:
+        second_page_posts_count = Post.objects.count() - (
+            before_posts_count - POSTS_PER_PAGE)
+        cases = {
+            MAIN_URL: POSTS_PER_PAGE,
+            MAIN_URL + '?page=2': second_page_posts_count,
+            GROUP_URL: POSTS_PER_PAGE,
+            GROUP_URL + '?page=2': second_page_posts_count,
+            PROFILE_URL: POSTS_PER_PAGE,
+            PROFILE_URL + '?page=2': second_page_posts_count,
+            FOLLOW_URL: POSTS_PER_PAGE,
+            FOLLOW_URL + '?page=2': second_page_posts_count,
+        }
+        for url, posts_count in cases.items():
             with self.subTest(url=url):
                 response = self.follower_client.get(url)
                 self.assertEqual(
-                    len(response.context['page_obj']), POSTS_PER_PAGE
+                    len(response.context['page_obj']), posts_count
                 )
-                response2 = self.follower_client.get(url + '?page=2')
-                self.assertEqual(len(response2.context['page_obj']), 2)
 
     def test_cache_index_page(self):
         """Кэширование главной страницы работает"""
         cache1 = self.authorized_client.get(MAIN_URL)
-        self.assertEqual(len(cache1.context['page_obj']), 1)
-        first_post = cache1.context['page_obj'][0]
-        first_post.text = 'Текст изменился'
-        first_post.save()
+        Post.objects.all().delete()
         cache2 = self.authorized_client.get(MAIN_URL)
         self.assertEqual(cache1.content, cache2.content)
         cache.clear()
@@ -160,14 +167,14 @@ class PostsPageTests(TestCase):
         self.assertTrue(follow.exists())
         self.assertEqual(len(follow), 1)
         self.assertEqual(Follow.objects.count(), follow_count + 1)
-        self.assertEqual(follow.author_id, self.user.id)
-        self.assertEqual(follow.user_id, self.nonfollower.id)
 
-    def test_user_can_follow_author(self):
+    def test_user_can_unfollow_author(self):
         """Авторизованный пользователь может удалять авторов из подписок"""
         follow_count = Follow.objects.count()
         self.follower_client.post(PROFILE_UNFOLLOW_URL)
         self.assertEqual(Follow.objects.count(), follow_count - 1)
+        self.assertFalse(Follow.objects.filter(user=self.follower,
+                         author=self.user).exists())
 
     def test_user_cant_follow_self(self):
         """Авторизованный пользователь не может подписаться на себя"""

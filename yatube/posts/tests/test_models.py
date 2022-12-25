@@ -1,6 +1,6 @@
 from django.test import TestCase
 
-from ..models import Group, Post, User, Comment, Follow, FOLLOW
+from ..models import Group, Post, User, Comment, Follow, SUBSCRIPTION
 
 USER = 'logged_user'
 AUTHOR = 'author'
@@ -37,7 +37,7 @@ class PostModelTest(TestCase):
             str(self.post): self.post.text[:15],
             str(self.group): self.group.title,
             str(self.comment): self.comment.text[:15],
-            str(self.follow): FOLLOW.format(
+            str(self.follow): SUBSCRIPTION.format(
                 user=self.user.username, author=self.author.username),
         }
         for field, expected_value in field_strs.items():

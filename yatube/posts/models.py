@@ -3,7 +3,7 @@ from django.contrib.auth import get_user_model
 
 User = get_user_model()
 
-FOLLOW = '{user} подписался на {author}'
+SUBSCRIPTION = '{user} подписался на {author}'
 
 
 class Group(models.Model):
@@ -123,6 +123,6 @@ class Follow(models.Model):
         ]
 
     def __str__(self):
-        return FOLLOW.format(
+        return SUBSCRIPTION.format(
             user=self.user.username, author=self.author.username
         )

@@ -1,15 +1,14 @@
 {% extends 'base.html' %}
 {% block title %}Последние записи избранных авторов{% endblock %}
 {% block content %}
-  <div class="container py-5">
-    {% include 'posts/includes/switcher.html' with follow=True %}
-    <h1>Последние записи избранных авторов</h1>
-    {% load cache %}
-    {% cache 20 follow_page %}
+  {% include 'posts/includes/switcher.html' with follow=True %}
+  <h1>Последние записи избранных авторов</h1>
+  {% load cache %}
+  {% cache 20 follow_page page_obj.number %}
     {% for post in page_obj %}
-      {% include 'posts/includes/posts.html' %}
-    {% endfor %}  
-    {% endcache %}
-    {% include 'posts/includes/paginator.html' %}
-  </div>
+      {% include 'posts/includes/post.html' %}
+      {% if not forloop.last %}<hr />{% endif %}
+    {% endfor %}
+  {% endcache %}
+  {% include 'posts/includes/paginator.html' %}
 {% endblock %}
