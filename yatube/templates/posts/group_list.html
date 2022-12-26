@@ -4,9 +4,10 @@
   <h1>{{ group.title }}</h1>
   <p>{{ group.description|linebreaksbr }}</p>
   {% load cache %}
+  {% comment %} page_obj.number - для кеширования страниц пагинатора {% endcomment %}
   {% cache 20 group_page page_obj.number %}
     {% for post in page_obj %}
-      {% include 'posts/includes/post.html' with group_list=True%}
+      {% include 'posts/includes/post.html' with group_name=False%} 
       {% if not forloop.last %}<hr />{% endif %}
     {% endfor %}
   {% endcache %}

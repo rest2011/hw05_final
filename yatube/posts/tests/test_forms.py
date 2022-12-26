@@ -164,12 +164,13 @@ class PostFormTests(TestCase):
             data=form_data,
             follow=True
         )
+        comments = set(Comment.objects.all()) - comments
         self.assertRedirects(response, self.POST_DETAIL_URL)
-        self.assertEqual(len(set(Comment.objects.all())), len(comments) + 1)
-        comment = set(Comment.objects.all()).pop()
+        self.assertEqual(len(comments), 1)
+        comment = comments.pop()
         self.assertEqual(form_data['text'], comment.text)
-        self.assertEqual(comment.post, self.post)
-        self.assertEqual(comment.author, self.user)
+        self.assertEqual(self.post, comment.post)
+        self.assertEqual(self.user, comment.author)
 
     def test_guest_cant_create_comment_or_post(self):
         """Гость не может создать комментарий или пост"""
@@ -198,7 +199,8 @@ class PostFormTests(TestCase):
                 response = self.guest_client.post(url, data=form_data,
                                                   follow=True)
                 self.assertRedirects(response, redirect)
-                self.assertEqual(class_.objects, objects_before_posting)
+                self.assertEqual(set(class_.objects.all()),
+                                 set(objects_before_posting.all()))
 
     def test_guest_or_nonauthor_cant_update_post(self):
         """Гость или неавтор не могут редактировать пост"""
@@ -221,6 +223,4 @@ class PostFormTests(TestCase):
                 response = client.post(
                     self.POST_EDIT_URL, data=form_data, follow=True)
                 self.assertRedirects(response, redirect)
-                self.assertNotEqual(form_data['text'], self.post.text)
-                self.assertNotEqual(form_data['group'], self.post.group)
-                self.assertNotEqual(form_data['image'], self.post.image)
+                self.assertEqual(self.user, self.post.author)

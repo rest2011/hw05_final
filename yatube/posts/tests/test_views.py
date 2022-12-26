@@ -112,16 +112,16 @@ class PostsPageTests(TestCase):
         self.assertEqual(group.slug, self.group.slug)
         self.assertEqual(group.id, self.group.id)
 
-    def test_post_in_right_group_and_follow(self):
+    def test_post_not_in_another_group_and_follow(self):
         """Поста нет не в своей группе и подписке"""
         urls = [GROUP_URL, FOLLOW_URL]
         for url in urls:
             self.assertNotIn(self.post, self.authorized_client.get(url).
                              context['page_obj'])
 
-    def pagination_contains_pages_with_up_to_10_posts_each(self):
-        """Пагинация содержит страницы, имеющие каждая до 10 постов"""
-        before_posts_count = Post.objects.count()
+    def pagination_contains_right_amount_posts(self):
+        """Пагинация содержит правильное число постов"""
+        Post.objects.all().delete()
         Post.objects.bulk_create(
             Post(
                 author=self.user,
@@ -129,17 +129,15 @@ class PostsPageTests(TestCase):
                 group=self.group,
             )
             for i in range(POSTS_PER_PAGE + 1))
-        second_page_posts_count = Post.objects.count() - (
-            before_posts_count - POSTS_PER_PAGE)
         cases = {
             MAIN_URL: POSTS_PER_PAGE,
-            MAIN_URL + '?page=2': second_page_posts_count,
+            MAIN_URL + '?page=2': 1,
             GROUP_URL: POSTS_PER_PAGE,
-            GROUP_URL + '?page=2': second_page_posts_count,
+            GROUP_URL + '?page=2': 1,
             PROFILE_URL: POSTS_PER_PAGE,
-            PROFILE_URL + '?page=2': second_page_posts_count,
+            PROFILE_URL + '?page=2': 1,
             FOLLOW_URL: POSTS_PER_PAGE,
-            FOLLOW_URL + '?page=2': second_page_posts_count,
+            FOLLOW_URL + '?page=2': 1,
         }
         for url, posts_count in cases.items():
             with self.subTest(url=url):
@@ -180,4 +178,4 @@ class PostsPageTests(TestCase):
         """Авторизованный пользователь не может подписаться на себя"""
         self.authorized_client.post(PROFILE_FOLLOW_URL)
         self.assertFalse(Follow.objects.filter(user=self.user,
-                         author=self.user))
+                         author=self.user).exists())

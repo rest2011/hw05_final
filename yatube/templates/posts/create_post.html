@@ -3,7 +3,7 @@
   {% if post %}Редактировать пост{% else %}Создать пост{% endif %}
 {% endblock %}
 {% block content %}
-{% load user_filters %}
+  {% load user_filters %}
   <div class="row justify-content-center">
     <div class="col-md-8 p-5">
       <div class="card">
@@ -11,8 +11,15 @@
           {% if post %}Редактировать пост{% else %}Новый пост{% endif %}
         </div>
         <div class="card-body">
-          <form method="post" enctype="multipart/form-data""
-                action="{% if post %}{% url 'posts:post_edit' post.id %} {% else %}{% url 'posts:post_create' %}{% endif %}">
+          <form method="post" enctype="multipart/form-data"
+            action="
+            {% if post %}
+              {% url 'posts:post_edit' post.id %}
+            {% else %}
+              {% url 'posts:post_create' %}
+            {% endif %}
+            "
+          >
             {% csrf_token %}
             {% if form.errors %}
               {% for error in form.field_errors %}<div class="alert alert-danger">{{ error|escape }}</div>{% endfor %}
