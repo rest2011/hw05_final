@@ -10,7 +10,7 @@
   <p>{{ post.text|linebreaksbr }}</p>
   <a href="{% url 'posts:post_detail' post.pk %}">подробная информация</a>
   <br>
-  {% if post.group and group_name %}
+  {% if post.group and not group_list %}
     Группа: <a href="{% url 'posts:group_list' post.group.slug %}">"{{ post.group.title }}"</a>
   {% endif %}
 </article>

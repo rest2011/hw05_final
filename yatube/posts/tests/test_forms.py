@@ -195,12 +195,12 @@ class PostFormTests(TestCase):
         ]
         for url, class_, redirect, form_data in urls:
             with self.subTest(url=url):
-                objects_before_posting = class_.objects
+                objects_before_posting = set(class_.objects.all())
                 response = self.guest_client.post(url, data=form_data,
                                                   follow=True)
                 self.assertRedirects(response, redirect)
                 self.assertEqual(set(class_.objects.all()),
-                                 set(objects_before_posting.all()))
+                                 objects_before_posting)
 
     def test_guest_or_nonauthor_cant_update_post(self):
         """Гость или неавтор не могут редактировать пост"""
@@ -223,4 +223,5 @@ class PostFormTests(TestCase):
                 response = client.post(
                     self.POST_EDIT_URL, data=form_data, follow=True)
                 self.assertRedirects(response, redirect)
+                self.post.refresh_from_db()
                 self.assertEqual(self.user, self.post.author)

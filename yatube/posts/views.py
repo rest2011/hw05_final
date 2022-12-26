@@ -30,11 +30,12 @@ def profile(request, username):
     return render(request, 'posts/profile.html', {
         'page_obj': page_obj(request, author.posts.all()),
         'author': author,
-        'following': request.user != author and (
-            request.user.is_authenticated
+        'following':
+            request.user != author
+            and request.user.is_authenticated
             and Follow.objects.filter(
                 user=request.user, author=author
-            ).exists()),
+        ).exists(),
     })
 
 

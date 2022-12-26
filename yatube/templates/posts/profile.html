@@ -21,7 +21,7 @@
     {% load cache %}
     {% cache 20 profile_page page_obj.number %}
       {% for post in page_obj %}
-        {% include 'posts/includes/post.html' with group_name=True %}
+        {% include 'posts/includes/post.html' %}
         {% if not forloop.last %}<hr />{% endif %}
       {% endfor %}
     {% endcache %}
