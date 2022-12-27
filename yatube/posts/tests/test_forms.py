@@ -222,6 +222,9 @@ class PostFormTests(TestCase):
             with self.subTest(client=client):
                 response = client.post(
                     self.POST_EDIT_URL, data=form_data, follow=True)
+                post = Post.objects.get(id=self.post.id)
                 self.assertRedirects(response, redirect)
-                self.post.refresh_from_db()
-                self.assertEqual(self.user, self.post.author)
+                self.assertEqual(post.text, self.post.text)
+                self.assertEqual(post.group, self.post.group)
+                self.assertEqual(post.author, self.post.author)
+                self.assertEqual(post.image, self.post.image)

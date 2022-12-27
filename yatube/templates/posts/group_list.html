@@ -7,7 +7,7 @@
   {% comment %} page_obj.number - для кеширования страниц пагинатора {% endcomment %}
   {% cache 20 group_page page_obj.number %}
     {% for post in page_obj %}
-      {% include 'posts/includes/post.html' with group_list=True %} 
+      {% include 'posts/includes/post.html' with hide_group=True %} 
       {% if not forloop.last %}<hr />{% endif %}
     {% endfor %}
   {% endcache %}
